@@ -33,6 +33,8 @@ const bassValue = document.getElementById('bassValue');
 const channelInputs = document.querySelectorAll('input[name="channelInput"]');
 const presetButtons = document.querySelectorAll('.btn-preset'); // Get all preset buttons
 
+const feedbackTimeouts = {};
+
 // --- Bluetooth Connection ---
 connectButton.addEventListener('click', async () => {
     try {
@@ -138,31 +140,30 @@ async function handlePresetClick(event) {
 
     console.log(`Applying preset: ${presetName}`, preset);
 
-    // Update Bass Slider & Value
+    // Update UI First
     bassInput.value = preset.bass;
     updateSliderValue('bass');
-
-    // Update Treble Slider & Value
     trebleInput.value = preset.treble;
     updateSliderValue('treble');
 
-    // Send updated Bass and Treble values if connected
+    // Send updated values if connected
     if (bluetoothDevice && bluetoothDevice.gatt.connected) {
-         // Use Promise.all to send concurrently (slightly faster)
         try {
+            // Send concurrently
             await Promise.all([
-                sendData('bass'),
-                sendData('treble')
+                sendData('bass'), // sendData will now handle feedback internally
+                sendData('treble') // sendData will now handle feedback internally
             ]);
-             console.log('Preset values sent.');
+             console.log('Preset values sent successfully.');
+             // Optional: Feedback on the preset button itself?
+             // showFeedback(event.target); // If you adapt showFeedback to handle button elements
         } catch(error) {
-            console.error('Error sending preset values:', error);
-            alert('Error sending preset values. Check connection.');
+            // Error is logged within sendData now, but maybe show general preset error
+            console.error('Error sending one or more preset values.', error);
+            alert('Error applying preset. Check connection.');
         }
     } else {
         console.log('Device not connected. Preset applied to UI only.');
-        // Optionally alert the user they need to connect first
-        // alert('Connect to a device first to apply presets.');
     }
 }
 
@@ -181,46 +182,45 @@ function handleControlChange(type) {
     }, 150); // Send data after 150ms of inactivity
 }
 
-
 // --- Send Data to Bluetooth Characteristic ---
 async function sendData(type) {
     // Check connection and characteristic existence
     if (!bluetoothDevice || !bluetoothDevice.gatt.connected) {
-        // alert('Not connected to a device!'); // Avoid alert spam, maybe show in status
         console.warn(`SendData (${type}): Not connected.`);
-        return;
+        return; // Don't try to send if not connected
     }
      if (!characteristics[type]) {
         console.error(`SendData (${type}): Characteristic not available.`);
-        // alert(`Error: Characteristic for ${type} not found!`);
-        return;
+        return; // Don't try to send if characteristic missing
     }
 
     let dataValue;
     if (type === 'channel') {
         const checkedChannel = document.querySelector('input[name="channelInput"]:checked');
-        dataValue = checkedChannel ? checkedChannel.value : '1'; // Default to '1' if none checked
+        dataValue = checkedChannel ? checkedChannel.value : '1';
     } else {
         dataValue = document.getElementById(`${type}Input`).value;
     }
 
     console.log(`Sending ${type}: ${dataValue}`);
-    const encoder = new TextEncoder(); // Use TextEncoder to send string data
+    const encoder = new TextEncoder();
     const encodedData = encoder.encode(dataValue);
 
     try {
-        // Write without response for potentially faster operation if supported/required
-        // await characteristics[type].writeValueWithoutResponse(encodedData);
-        // Or write with response (default, safer)
-        await characteristics[type].writeValueWithResponse(encodedData); // Changed to WithResponse for robustness
+        await characteristics[type].writeValueWithResponse(encodedData);
         console.log(`Successfully sent ${type}: ${dataValue}`);
+
+        // --- SUCCESS: Trigger Visual Feedback ---
+        showFeedback(type);
+        // --- End Feedback Trigger ---
+
     } catch (error) {
         console.error(`Error sending ${type} data:`, error);
         statusDisplay.textContent = `Status: Error sending ${type}`;
-        // Handle specific errors, e.g., disconnection
         if (error.name === 'NetworkError') {
-             onDisconnected(); // Update status if disconnected during write
+             onDisconnected();
         }
+        // --- ERROR: Do NOT show feedback ---
     }
 }
 
@@ -245,4 +245,46 @@ async function syncAllControls() {
          console.error('Error during initial sync:', error);
          statusDisplay.textContent = 'Status: Error syncing initial values.';
     }
+}
+
+// --- Helper Function for Visual Feedback ---
+function showFeedback(controlType) {
+    let element;
+
+    if (controlType === 'channel') {
+        const checkedRadio = document.querySelector('input[name="channelInput"]:checked');
+        if (checkedRadio) {
+            // Find the label associated with the checked radio button
+            element = document.querySelector(`label[for="${checkedRadio.id}"]`);
+        }
+    } else if (['volume', 'treble', 'bass'].includes(controlType)) {
+        element = document.getElementById(`${controlType}Input`);
+    }
+
+    if (!element) {
+        console.warn(`Feedback element not found for type: ${controlType}`);
+        return;
+    }
+
+    const feedbackClass = 'control-success-glow';
+    const timeoutKey = element.id || element.getAttribute('for'); // Unique key for timeout
+
+    // Clear any existing timeout for this specific element
+    if (feedbackTimeouts[timeoutKey]) {
+        clearTimeout(feedbackTimeouts[timeoutKey]);
+        element.classList.remove(feedbackClass); // Remove class immediately if re-triggering
+        // Short delay before re-applying to ensure visual reset
+        requestAnimationFrame(() => requestAnimationFrame(() => applyFeedback(element, feedbackClass, timeoutKey)));
+    } else {
+         applyFeedback(element, feedbackClass, timeoutKey);
+    }
+}
+
+function applyFeedback(element, feedbackClass, timeoutKey) {
+    element.classList.add(feedbackClass);
+    // Store the timeout ID
+    feedbackTimeouts[timeoutKey] = setTimeout(() => {
+        element.classList.remove(feedbackClass);
+        delete feedbackTimeouts[timeoutKey]; // Clean up timeout reference
+    }, 600); // Duration of the glow effect in milliseconds
 }

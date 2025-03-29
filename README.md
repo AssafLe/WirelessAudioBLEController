@@ -12,10 +12,10 @@ The app provides a modern and responsive UI with real-time feedback for slider v
 
 ## Features
 
-- ✔ **Easy Bluetooth Connection** – Connect to any compatible Bluetooth device with a single click.
-- ✔ **Real-Time Value Display** – Displays the exact value of volume, treble, and bass as you adjust them.
-- ✔ **Instant Data Transmission** – Sends updates immediately upon changing a setting.
-- ✔ **Minimalistic & Modern UI** – Designed for ease of use with clean styling and intuitive controls.
+- **Easy Bluetooth Connection** – Connect to any compatible Bluetooth device with a single click.
+- **Real-Time Value Display** – Displays the exact value of volume, treble, and bass as you adjust them.
+- **Instant Data Transmission** – Sends updates immediately upon changing a setting.
+- **Minimalistic & Modern UI** – Designed for ease of use with clean styling and intuitive controls.
 
 ## How It Works
 

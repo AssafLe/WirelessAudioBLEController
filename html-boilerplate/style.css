@@ -1,4 +1,213 @@
-p {
-    color: red;
-    background-color: black;
+/* --- Global Styles & Variables --- */
+:root {
+    --primary-color: #007bff; /* Blue */
+    --secondary-color: #6c757d; /* Gray */
+    --light-gray: #f8f9fa;
+    --dark-gray: #343a40;
+    --background-color: #eef2f7;
+    --container-bg: #ffffff;
+    --slider-track-color: #dee2e6;
+    --slider-thumb-color: var(--primary-color);
+    --text-color: #495057;
+    --heading-color: #212529;
+    --border-color: #ced4da;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* --- Container --- */
+.container {
+    background-color: var(--container-bg);
+    padding: 30px 35px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+h2 {
+    color: var(--heading-color);
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+h3 {
+    color: var(--heading-color);
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: 500;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+/* --- Connect Button --- */
+.btn {
+    display: inline-block;
+    font-weight: 500;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 20px; /* Pill shape */
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, transform .1s ease;
+    width: 80%;
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* --- Status Text --- */
+.status-text {
+    margin-bottom: 25px;
+    color: var(--secondary-color);
+    font-style: italic;
+    min-height: 1.6em; /* Prevent layout shift */
+}
+
+/* --- Control Grouping --- */
+.control-group {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+/* --- Channel Radio Buttons (Button Style) --- */
+.channel-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.channel-options input[type="radio"] {
+    display: none; /* Hide the actual radio button */
+}
+
+.channel-options label {
+    flex: 1; /* Distribute space equally */
+    text-align: center;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    background-color: #fff;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.channel-options label:hover {
+    background-color: var(--light-gray);
+}
+
+.channel-options input[type="radio"]:checked + label {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+/* --- Sliders --- */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between slider and value */
+    width: 100%;
+}
+
+input[type="range"] {
+    flex-grow: 1; /* Slider takes available space */
+    appearance: none; /* Override default look */
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px; /* Track height */
+    background: var(--slider-track-color);
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+input[type="range"]:hover {
+    background: #cdd4db; /* Slightly darker track on hover */
+}
+
+/* Slider Thumb (Chrome, Safari, Edge, Opera) */
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    background: var(--slider-thumb-color);
+    border-radius: 50%;
+    border: 3px solid #fff; /* White border for contrast */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    margin-top: -6px; /* Center thumb vertically on the track */
+    transition: background-color 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background-color: #0056b3;
+}
+
+/* Slider Thumb (Firefox) */
+input[type="range"]::-moz-range-thumb {
+    height: 18px; /* Adjust if needed */
+    width: 18px;
+    background: var(--slider-thumb-color);
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background-color: #0056b3;
+}
+
+/* Slider Value Display */
+.slider-value {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 35px; /* Prevent layout shifts */
+    text-align: right;
+    background-color: var(--light-gray);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
 }

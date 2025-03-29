@@ -2,17 +2,17 @@
 
 ## Overview
 
-This web application allows users to connect to a Bluetooth-enabled audio device and control key audio parameters, including:
+This web application allows users to connect to the Wireless Audio system built as Project A.
 - **Volume** (adjustable via a slider)
 - **Treble** (adjustable via a slider)
 - **Bass** (adjustable via a slider)
 - **Channel Selection** (switch between channels 1-4 using radio buttons)
 
-The app provides a modern and responsive UI with real-time feedback for slider values and ensures seamless communication with the connected Bluetooth device.
+The app provides a modern and responsive UI with real-time feedback for slider values and ensures seamless communication with the audio system.
 
 ## Features
 
-- **Easy Bluetooth Connection** – Connect to any compatible Bluetooth device with a single click.
+- **Easy Bluetooth Connection** – Connect the the Wireless Audio system via BLE.
 - **Real-Time Value Display** – Displays the exact value of volume, treble, and bass as you adjust them.
 - **Instant Data Transmission** – Sends updates immediately upon changing a setting.
 - **Minimalistic & Modern UI** – Designed for ease of use with clean styling and intuitive controls.
@@ -34,11 +34,3 @@ The app provides a modern and responsive UI with real-time feedback for slider v
 1. Open the `index.html` file in a modern browser (Chrome recommended).
 2. Click **Connect to Bluetooth** and select your device.
 3. Adjust audio settings as needed.
-
-## Contributing
-
-If you'd like to contribute to this project, feel free to fork the repository and submit pull requests. All contributions are welcome!
-
-## License
-
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.

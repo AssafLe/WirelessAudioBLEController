@@ -43,5 +43,4 @@ async function sendData(type) {
     }
     const encoder = new TextEncoder();
     await characteristics[type].writeValue(encoder.encode(data));
-    alert(`${type.charAt(0).toUpperCase() + type.slice(1)} sent: ` + data);
 }

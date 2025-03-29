@@ -211,3 +211,40 @@ input[type="range"]::-moz-range-thumb:hover {
     border-radius: 4px;
     font-size: 0.9em;
 }
+
+/* --- EQ Presets --- */
+.preset-group h3 {
+    text-align: center; /* Center the preset heading */
+    border-bottom: none; /* Optional: Remove border if preferred */
+    margin-bottom: 10px;
+}
+
+.preset-buttons {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap to next line */
+    gap: 8px;        /* Spacing between buttons */
+    justify-content: center; /* Center buttons horizontally */
+}
+
+.btn-preset {
+    flex-grow: 1; /* Allow buttons to grow */
+    min-width: 80px; /* Minimum width for smaller buttons */
+    padding: 6px 12px; /* Slightly smaller padding */
+    font-size: 0.9rem;
+    border-radius: var(--border-radius); /* Consistent rounding */
+    background-color: var(--light-gray);
+    color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+}
+
+.btn-preset:hover {
+    background-color: #e2e6ea;
+    border-color: #adb5bd;
+    color: var(--dark-gray);
+}
+
+.btn-preset:active {
+    background-color: #d6dade;
+    transform: scale(0.98); /* Keep active effect */
+}

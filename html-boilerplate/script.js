@@ -32,69 +32,139 @@ const bassInput = document.getElementById('bassInput');
 const bassValue = document.getElementById('bassValue');
 const channelInputs = document.querySelectorAll('input[name="channelInput"]');
 const presetButtons = document.querySelectorAll('.btn-preset'); // Get all preset buttons
+const allControls = [
+    volumeInput,
+    trebleInput,
+    bassInput,
+    ...channelInputs, // Spread NodeList into the array
+    ...presetButtons  // Spread NodeList into the array
+];
 
 const feedbackTimeouts = {};
 
-// --- Bluetooth Connection ---
-connectButton.addEventListener('click', async () => {
+// --- MODIFIED: Bluetooth Connection Logic ---
+connectButton.addEventListener('click', () => {
+    // Check the current connection state to decide action
+    if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+        disconnectDevice();
+    } else {
+        connectDevice();
+    }
+});
+
+// --- NEW: Function to handle connection process ---
+async function connectDevice() {
+    // --- UI Update: Start Connecting ---
+    statusDisplay.textContent = 'Status: Connecting...';
+    connectButton.textContent = 'Connecting...';
+    connectButton.disabled = true;
+    disableAllControls(); // Disable controls during connection attempt
+    // --- End UI Update ---
+
     try {
-        statusDisplay.textContent = 'Status: Connecting...';
+        console.log('Requesting Bluetooth Device...');
         bluetoothDevice = await navigator.bluetooth.requestDevice({
-            // Use filter for specific service instead of acceptAllDevices if possible
             filters: [{ services: [SERVICE_UUID] }],
-             //filters: [{ name: 'YourDeviceName' }], // Alternatively filter by name
-            // acceptAllDevices: true, // Use filters if possible for better UX
             optionalServices: [SERVICE_UUID]
         });
 
-        // Optional: Add disconnect listener
+        console.log('Connecting to GATT Server...');
+        // Add listener *before* connecting
         bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
-
         const server = await bluetoothDevice.gatt.connect();
+
+        console.log('Getting Service...');
         const service = await server.getPrimaryService(SERVICE_UUID);
 
-        // Clear previous characteristics if reconnecting
-        characteristics = {};
-        for (let key in CHARACTERISTIC_UUIDS) {
-            try {
-                characteristics[key] = await service.getCharacteristic(CHARACTERISTIC_UUIDS[key]);
-                console.log(`Found Characteristic: ${key}`);
-            } catch (charError) {
-                 console.error(`Characteristic ${key} (${CHARACTERISTIC_UUIDS[key]}) not found!`, charError);
-                 statusDisplay.textContent = `Error: Characteristic ${key} missing`;
-                 // Optionally disconnect or disable controls for missing characteristics
-                 return; // Stop connection process if a critical characteristic is missing
-            }
-        }
+        console.log('Getting Characteristics...');
+        characteristics = {}; // Reset characteristics
+        // Use Promise.all for potentially faster characteristic discovery
+        await Promise.all(Object.keys(CHARACTERISTIC_UUIDS).map(async (key) => {
+             try {
+                 characteristics[key] = await service.getCharacteristic(CHARACTERISTIC_UUIDS[key]);
+                 console.log(`Found Characteristic: ${key}`);
+             } catch (charError) {
+                  console.error(`Characteristic ${key} (${CHARACTERISTIC_UUIDS[key]}) not found!`, charError);
+                  // Throw an error to be caught by the outer catch block, indicating critical failure
+                  throw new Error(`Missing characteristic: ${key}`);
+             }
+         }));
 
+        // --- UI Update: Connection Successful ---
         statusDisplay.textContent = `Status: Connected to ${bluetoothDevice.name || 'device'}`;
+        connectButton.textContent = 'Disconnect'; // Change button text
+        connectButton.disabled = false; // Re-enable button
+        enableAllControls(); // Enable controls now that we are connected
+        console.log('Device connected and characteristics ready.');
+        // --- End UI Update ---
 
-        // Set initial values from UI (or defaults if needed) and send them
+        // Sync UI state to the newly connected device
         await syncAllControls();
 
     } catch (error) {
         console.error('Bluetooth Connection Error:', error);
-        statusDisplay.textContent = `Status: Connection failed (${error.message})`;
-        // Reset characteristics if connection fails
-        characteristics = {};
+        // --- UI Update: Connection Failed ---
+        statusDisplay.textContent = `Status: Connection failed (${error.message.includes('User cancelled') ? 'User cancelled' : error.message})`;
+        connectButton.textContent = 'Connect'; // Revert button text
+        connectButton.disabled = false; // Re-enable button (to allow retry)
+        // Keep controls disabled (as they were already disabled at the start)
+        // --- End UI Update ---
+
+        // Clean up any partial connection state
         if (bluetoothDevice) {
-             bluetoothDevice.removeEventListener('gattserverdisconnected', onDisconnected);
+            // Remove listener if added
+            bluetoothDevice.removeEventListener('gattserverdisconnected', onDisconnected);
+            if (bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect(); // Attempt disconnect if partially connected
+            }
         }
         bluetoothDevice = null;
+        characteristics = {};
+        // No need to call disableAllControls() again here, they are already disabled
     }
-});
-
-function onDisconnected() {
-    statusDisplay.textContent = 'Status: Device disconnected';
-    console.log('Bluetooth device disconnected.');
-    characteristics = {}; // Clear characteristics
-    bluetoothDevice = null; // Clear device reference
-    // Optionally disable controls here
 }
 
-// --- Initial Setup & Event Listeners ---
+// --- NEW: Function to handle disconnection process ---
+function disconnectDevice() {
+    if (!bluetoothDevice || !bluetoothDevice.gatt.connected) {
+        console.log('Disconnect called but device not connected or already disconnecting.');
+        // Ensure UI is in disconnected state if something went wrong
+        onDisconnected(); // This will handle UI reset
+        return;
+    }
+    console.log('Disconnecting from device...');
+    statusDisplay.textContent = 'Status: Disconnecting...';
+    connectButton.disabled = true; // Disable button during disconnect process
+    bluetoothDevice.gatt.disconnect();
+    // The 'gattserverdisconnected' event will trigger onDisconnected() for final cleanup
+}
+
+// --- MODIFIED: Handle disconnection event ---
+function onDisconnected() {
+    console.log('Bluetooth device disconnected.');
+
+    // --- UI Update: Disconnected State ---
+    statusDisplay.textContent = 'Status: Not connected';
+    connectButton.textContent = 'Connect';
+    connectButton.disabled = false; // Enable button to allow reconnect attempt
+    disableAllControls(); // Ensure controls are disabled
+    // --- End UI Update ---
+
+    // Clean up state variables and listeners
+    if (bluetoothDevice) {
+         // Important: Remove listener to prevent duplicates if connectDevice is called again
+         bluetoothDevice.removeEventListener('gattserverdisconnected', onDisconnected);
+    }
+    bluetoothDevice = null;
+    characteristics = {};
+    // Clear any lingering feedback timeouts
+    Object.values(feedbackTimeouts).forEach(clearTimeout);
+    for (const key in feedbackTimeouts) delete feedbackTimeouts[key];
+}
+
+// --- MODIFIED: Initial Setup & Event Listeners ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Set default UI state (doesn't send anything yet)
+    // Set default UI state (values only)
     document.getElementById("channel1").checked = true;
     volumeInput.value = 50;
     trebleInput.value = 0;
@@ -103,6 +173,10 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSliderValue('treble');
     updateSliderValue('bass');
 
+    // --- Start with controls disabled ---
+    disableAllControls();
+
+    // --- Add Event Listeners ---
     // Slider listeners
     volumeInput.addEventListener("input", () => handleControlChange('volume'));
     trebleInput.addEventListener("input", () => handleControlChange('treble'));
@@ -117,6 +191,8 @@ document.addEventListener("DOMContentLoaded", () => {
     presetButtons.forEach(button => {
         button.addEventListener('click', handlePresetClick);
     });
+
+    // NOTE: The main connectButton listener is already added outside DOMContentLoaded
 });
 
 // --- Update Slider Value Display ---
@@ -287,4 +363,25 @@ function applyFeedback(element, feedbackClass, timeoutKey) {
         element.classList.remove(feedbackClass);
         delete feedbackTimeouts[timeoutKey]; // Clean up timeout reference
     }, 600); // Duration of the glow effect in milliseconds
+}
+
+// --- Helper Functions for Enabling/Disabling Controls ---
+function disableAllControls() {
+    allControls.forEach(control => control.disabled = true);
+    // Also visually dim the labels associated with disabled radio buttons
+    document.querySelectorAll('.channel-options label').forEach(label => {
+        label.style.opacity = '0.6';
+        label.style.cursor = 'not-allowed';
+    });
+    console.log("Controls Disabled");
+}
+
+function enableAllControls() {
+    allControls.forEach(control => control.disabled = false);
+    // Restore visual state for labels
+    document.querySelectorAll('.channel-options label').forEach(label => {
+        label.style.opacity = '1';
+        label.style.cursor = 'pointer';
+    });
+    console.log("Controls Enabled");
 }

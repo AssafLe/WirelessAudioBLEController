@@ -3,70 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluetooth Audio Control</title>
+    <title>Bluetooth Audio Mixer</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding: 20px; 
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
-            margin: auto;
-        }
-        button, input, label {
-            margin: 10px;
-            font-size: 16px;
-        }
-        .slider {
-            width: 100%;
-        }
-        .radio-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        .status {
-            font-weight: bold;
-            margin-top: 10px;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        button, input { margin: 10px; padding: 10px; font-size: 16px; }
+        .slider-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Bluetooth Audio Control</h2>
-        <button id="connect">Connect to Bluetooth</button>
+    <h2>Bluetooth Audio Mixer</h2>
+    <button id="connect">Connect to Bluetooth</button>
+    <p id="status">Status: Not connected</p>
 
-        <div>
-            <label for="volumeInput">Volume</label>
-            <input type="range" id="volumeInput" class="slider" min="0" max="100" value="50" oninput="sendData('volume')">
-        </div>
-        <div>
-            <label for="trebleInput">Treble</label>
-            <input type="range" id="trebleInput" class="slider" min="-10" max="10" value="0" oninput="sendData('treble')">
-        </div>
-        <div>
-            <label for="bassInput">Bass</label>
-            <input type="range" id="bassInput" class="slider" min="-10" max="10" value="0" oninput="sendData('bass')">
-        </div>
-        <div>
-            <label>Channel</label>
-            <div class="radio-group">
-                <input type="radio" name="channelInput" value="1" id="channel1" onclick="sendData('channel')"><label for="channel1">1</label>
-                <input type="radio" name="channelInput" value="2" id="channel2" onclick="sendData('channel')"><label for="channel2">2</label>
-                <input type="radio" name="channelInput" value="3" id="channel3" onclick="sendData('channel')"><label for="channel3">3</label>
-                <input type="radio" name="channelInput" value="4" id="channel4" onclick="sendData('channel')"><label for="channel4">4</label>
-            </div>
-        </div>
+    <h3>Channel</h3>
+    <label><input type="radio" name="channelInput" id="channel1" value="1"> 1</label>
+    <label><input type="radio" name="channelInput" value="2"> 2</label>
+    <label><input type="radio" name="channelInput" value="3"> 3</label>
+    <label><input type="radio" name="channelInput" value="4"> 4</label>
 
-        <p id="status" class="status">Status: Not connected</p>
+
+    <h3>Volume</h3>
+    <div class="slider-container">
+        <input type="range" id="volumeInput" min="0" max="100" step="1">
+        <span id="volumeValue">50</span>
     </div>
-    
+
+    <h3>Treble</h3>
+    <div class="slider-container">
+        <input type="range" id="trebleInput" min="-10" max="10" step="1">
+        <span id="trebleValue">0</span>
+    </div>
+
+    <h3>Bass</h3>
+    <div class="slider-container">
+        <input type="range" id="bassInput" min="-10" max="10" step="1">
+        <span id="bassValue">0</span>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

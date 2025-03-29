@@ -31,6 +31,10 @@ document.getElementById('connect').addEventListener('click', async () => {
         document.getElementById("trebleInput").value = 0;
         document.getElementById("bassInput").value = 0;
 
+        document.getElementById("volumeValue").textContent = "50";
+        document.getElementById("trebleValue").textContent = "0";
+        document.getElementById("bassValue").textContent = "0";
+
         await sendData('channel');
         await sendData('volume');
         await sendData('treble');
@@ -46,6 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("volumeInput").value = 50;
     document.getElementById("trebleInput").value = 0;
     document.getElementById("bassInput").value = 0;
+
+    document.getElementById("volumeInput").addEventListener("input", () => {
+        document.getElementById("volumeValue").textContent = document.getElementById("volumeInput").value;
+    });
+    document.getElementById("trebleInput").addEventListener("input", () => {
+        document.getElementById("trebleValue").textContent = document.getElementById("trebleInput").value;
+    });
+    document.getElementById("bassInput").addEventListener("input", () => {
+        document.getElementById("bassValue").textContent = document.getElementById("bassInput").value;
+    });
 });
 
 async function sendData(type) {

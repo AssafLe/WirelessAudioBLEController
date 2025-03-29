@@ -24,10 +24,28 @@ document.getElementById('connect').addEventListener('click', async () => {
         }
 
         document.getElementById('status').textContent = 'Status: Connected';
+
+        // Set default values and send them to the characteristics
+        document.getElementById("channel1").checked = true;
+        document.getElementById("volumeInput").value = 50;
+        document.getElementById("trebleInput").value = 0;
+        document.getElementById("bassInput").value = 0;
+
+        await sendData('channel');
+        await sendData('volume');
+        await sendData('treble');
+        await sendData('bass');
     } catch (error) {
         console.error(error);
         document.getElementById('status').textContent = 'Status: Connection failed';
     }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("channel1").checked = true;
+    document.getElementById("volumeInput").value = 50;
+    document.getElementById("trebleInput").value = 0;
+    document.getElementById("bassInput").value = 0;
 });
 
 async function sendData(type) {

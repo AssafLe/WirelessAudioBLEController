@@ -90,6 +90,18 @@ h3 {
     border-color: #0056b3;
 }
 
+.btn-secondary {
+    color: var(--dark-gray);
+    background-color: var(--light-gray);
+    border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: #e2e6ea;
+    border-color: #adb5bd;
+    color: var(--dark-gray);
+}
+
 .btn:active {
     transform: scale(0.98);
 }
@@ -148,7 +160,7 @@ h3 {
 .slider-container {
     display: flex;
     align-items: center;
-    gap: 15px; /* Space between slider and value */
+    gap: 10px; /* Space between slider and value */
     width: 100%;
 }
 
@@ -234,6 +246,30 @@ input[type="range"]::-moz-range-thumb:hover {
     justify-content: center; /* Center buttons horizontally */
 }
 
+.mute-toggle-btn.muted {
+    background-color: #dc3545; /* Red indicating muted */
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.mute-toggle-btn.muted:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.mute-toggle-btn {
+    width: auto; /* Override the default width: 80% */
+    padding: 8px 16px; /* Adjust padding */
+    width: auto; /* Allow it to size based on content */
+    padding: 6px 12px; /* Slightly smaller padding for inline look */
+    font-size: 0.9rem; /* Match preset button size perhaps */
+    flex-shrink: 0; /* Prevent button from shrinking if space is tight */
+    line-height: 1.4; /* Adjust line-height if text vertical alignment seems off */
+    /* Ensure border-radius matches other buttons if desired */
+    border-radius: var(--border-radius);
+
+}
+
 .btn-preset {
     flex-grow: 1; /* Allow buttons to grow */
     min-width: 80px; /* Minimum width for smaller buttons */
@@ -262,11 +298,12 @@ input[type="range"]::-moz-range-thumb:hover {
     /* Style for the temporary success feedback */
     box-shadow: 0 0 8px 2px var(--success-glow) !important; /* Use important if needed to override */
     border-color: var(--success-color) !important;
+    /* Make sure border glow doesn't conflict with muted red */
+}
+.mute-toggle-btn.control-success-glow.muted {
+    box-shadow: 0 0 8px 2px var(--success-glow) !important;
 }
 
 .channel-options label.control-success-glow {
-     /* Keep the glow, maybe make border more subtle or remove if it conflicts */
-     border-color: var(--success-color) !important;
-     /* Example: Make text bold during feedback */
-     /* font-weight: bold; */
+    border-color: var(--success-color) !important;
 }

@@ -1,8 +1,10 @@
 /* --- Global Styles & Variables --- */
 :root {
-    --primary-color: #007bff; /* Blue */
-    --secondary-color: #6c757d; /* Gray */
+    /* Light Theme (Default) */
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
     --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
     --dark-gray: #343a40;
     --background-color: #eef2f7;
     --container-bg: #ffffff;
@@ -13,9 +15,59 @@
     --border-color: #ced4da;
     --border-radius: 8px;
     --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --success-color: #28a745; /* Green for success */
-    --success-glow: rgba(40, 167, 69, 0.6); /* Semi-transparent green */
+    --success-color: #28a745;
+    --success-glow: rgba(40, 167, 69, 0.6);
+    --button-secondary-bg: #e9ecef;
+    --button-secondary-hover-bg: #dee2e6;
+    --button-secondary-active-bg: #ced4da;
+    --button-secondary-border: var(--border-color);
+    --button-secondary-hover-border: #adb5bd;
+    --button-secondary-text: var(--secondary-color);
+    --danger-color: #dc3545;
+    --danger-hover-color: #c82333;
+    --danger-border-color: #dc3545;
+    --danger-hover-border-color: #bd2130;
+    --danger-text-color: #fff;
+
+    /* Transition */
+    --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
+
+/* Dark Theme Variables */
+body[data-theme="dark"] {
+    --primary-color: #0d6efd;
+    --secondary-color: #adb5bd;
+    --light-gray: #343a40;
+    --medium-gray: #495057;
+    --dark-gray: #f8f9fa;
+    --background-color: #121212;
+    --container-bg: #1e1e1e;
+    --slider-track-color: #495057;
+    --slider-thumb-color: var(--primary-color);
+    --text-color: #ced4da;
+    --heading-color: #f8f9fa;
+    --border-color: #495057;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --success-color: #198754;
+    --success-glow: rgba(40, 167, 69, 0.7); /* Slightly brighter */
+    --button-secondary-bg: #343a40;
+    --button-secondary-hover-bg: #495057;
+    --button-secondary-active-bg: #5a6268;
+    --button-secondary-border: #5a6268;
+    --button-secondary-hover-border: #6c757d;
+    --button-secondary-text: #f8f9fa;
+    --danger-color: #bb2d3b; /* Adjusted red */
+    --danger-hover-color: #a52834;
+    --danger-border-color: #bb2d3b;
+    --danger-hover-border-color: #a52834;
+    --danger-text-color: #fff;
+    .slider-value {
+        color: var(--heading-color); /* Override color for better contrast */
+        background-color: var(--light-gray); /* Optional: Use a slightly darker gray background if needed */
+    }
+    --success-glow: rgba(40, 167, 69, 0.7);
+}
+
 
 * {
     box-sizing: border-box;
@@ -33,6 +85,7 @@ body {
     min-height: 100vh;
     padding: 20px;
     line-height: 1.6;
+    transition: var(--theme-transition);
 }
 
 /* --- Container --- */
@@ -44,12 +97,24 @@ body {
     width: 100%;
     max-width: 400px;
     text-align: center;
+    position: relative;
+    transition: var(--theme-transition);
+}
+
+/* Header Controls Wrapper */
+.header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
 }
 
 h2 {
     color: var(--heading-color);
-    margin-bottom: 25px;
+    margin-bottom: 0;
     font-weight: 600;
+    transition: var(--theme-transition);
+    text-align: left;
 }
 
 h3 {
@@ -58,11 +123,12 @@ h3 {
     font-size: 1.1em;
     font-weight: 500;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
+    transition: var(--theme-transition);
 }
 
-/* --- Connect Button --- */
+/* --- Buttons --- */
 .btn {
     display: inline-block;
     font-weight: 500;
@@ -73,37 +139,58 @@ h3 {
     border: 1px solid transparent;
     padding: 10px 20px;
     font-size: 1rem;
-    border-radius: 20px; /* Pill shape */
+    border-radius: 20px; /* Pill shape for main connect button */
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, transform .1s ease;
-    width: 80%;
-    margin-bottom: 20px;
+}
+.btn:active {
+    transform: scale(0.98);
 }
 
 .btn-primary {
     color: #fff;
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    width: 80%; /* Specific width for main connect button */
+    margin-bottom: 20px; /* Specific margin for main connect button */
 }
-
 .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+    background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+    border-color: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
 .btn-secondary {
-    color: var(--dark-gray);
-    background-color: var(--light-gray);
-    border-color: var(--border-color);
+    color: var(--button-secondary-text);
+    background-color: var(--button-secondary-bg);
+    border-color: var(--button-secondary-border);
 }
-
 .btn-secondary:hover {
-    background-color: #e2e6ea;
-    border-color: #adb5bd;
-    color: var(--dark-gray);
+    background-color: var(--button-secondary-hover-bg);
+    border-color: var(--button-secondary-hover-border);
+    color: var(--button-secondary-text);
 }
 
-.btn:active {
-    transform: scale(0.98);
+/* Theme Toggle Button Styles */
+.theme-toggle-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 1.4rem; /* Emoji size */
+    line-height: 1;
+    overflow: hidden;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.theme-toggle-btn:hover {
+     background-color: var(--medium-gray);
+     border-color: var(--secondary-color);
 }
 
 /* --- Status Text --- */
@@ -112,6 +199,7 @@ h3 {
     color: var(--secondary-color);
     font-style: italic;
     min-height: 1.6em; /* Prevent layout shift */
+    transition: var(--theme-transition);
 }
 
 /* --- Control Grouping --- */
@@ -120,36 +208,30 @@ h3 {
     text-align: left;
 }
 
-/* --- Channel Radio Buttons (Button Style) --- */
+/* --- Channel Radio Buttons --- */
 .channel-options {
     display: flex;
     justify-content: space-between;
     gap: 10px;
 }
-
 .channel-options input[type="radio"] {
-    display: none; /* Hide the actual radio button */
+    display: none;
 }
-
 .channel-options label {
-    flex: 1; /* Distribute space equally */
+    flex: 1;
     text-align: center;
     padding: 8px 10px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease,
-    box-shadow 0.15s ease-in-out; 
-    box-shadow: 0 0 0px 0px transparent;
-    background-color: #fff;
+    background-color: var(--container-bg);
     color: var(--text-color);
     font-weight: 500;
+    transition: var(--theme-transition), background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.15s ease-in-out;
 }
-
 .channel-options label:hover {
-    background-color: var(--light-gray);
+    background-color: var(--medium-gray);
 }
-
 .channel-options input[type="radio"]:checked + label {
     background-color: var(--primary-color);
     color: #fff;
@@ -160,32 +242,27 @@ h3 {
 .slider-container {
     display: flex;
     align-items: center;
-    gap: 10px; /* Space between slider and value */
+    gap: 8px; /* Gap between elements */
     width: 100%;
 }
 
 input[type="range"] {
-    flex-grow: 1; /* Slider takes available space */
-    appearance: none; /* Override default look */
+    flex-grow: 1;
+    appearance: none;
     -webkit-appearance: none;
     width: 100%;
-    height: 8px; /* Track height */
+    height: 8px;
     background: var(--slider-track-color);
-    border: 2px solid transparent;
-    padding: 0;
-    margin: -2px 0;
     border-radius: 5px;
-    box-shadow: 0 0 0px 0px transparent;
     outline: none;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: var(--theme-transition), background 0.2s ease, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
-
 input[type="range"]:hover {
-    background: #cdd4db; /* Slightly darker track on hover */
+    background: color-mix(in srgb, var(--slider-track-color) 85%, black);
 }
 
-/* Slider Thumb (Chrome, Safari, Edge, Opera) */
+/* Slider Thumb (WebKit) */
 input[type="range"]::-webkit-slider-thumb {
     appearance: none;
     -webkit-appearance: none;
@@ -193,117 +270,179 @@ input[type="range"]::-webkit-slider-thumb {
     width: 20px;
     background: var(--slider-thumb-color);
     border-radius: 50%;
-    border: 3px solid #fff; /* White border for contrast */
+    border: 3px solid var(--container-bg);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    margin-top: -6px; /* Center thumb vertically on the track */
-    transition: background-color 0.2s ease;
+    margin-top: -6px;
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* Add border transition */
 }
-
 input[type="range"]::-webkit-slider-thumb:hover {
-    background-color: #0056b3;
+    background-color: color-mix(in srgb, var(--slider-thumb-color) 85%, black);
 }
 
 /* Slider Thumb (Firefox) */
 input[type="range"]::-moz-range-thumb {
-    height: 18px; /* Adjust if needed */
+    height: 18px;
     width: 18px;
     background: var(--slider-thumb-color);
     border-radius: 50%;
-    border: 3px solid #fff;
+    border: 3px solid var(--container-bg);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* Add border transition */
+}
+input[type="range"]::-moz-range-thumb:hover {
+    background-color: color-mix(in srgb, var(--slider-thumb-color) 85%, black);
 }
 
-input[type="range"]::-moz-range-thumb:hover {
-    background-color: #0056b3;
+/* Wrapper for value and +/- buttons */
+.slider-value-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
 }
 
 /* Slider Value Display */
 .slider-value {
     font-weight: 600;
     color: var(--primary-color);
-    min-width: 35px; /* Prevent layout shifts */
-    text-align: right;
-    background-color: var(--light-gray);
-    padding: 3px 8px;
+    min-width: 30px;
+    text-align: center;
+    background-color: var(--medium-gray);
+    padding: 3px 6px;
     border-radius: 4px;
     font-size: 0.9em;
+    order: 2; /* Position between buttons */
+    transition: var(--theme-transition);
 }
+
+/* +/- adjustment buttons */
+.btn-adjust {
+    padding: 2px 6px;
+    font-size: 1rem;
+    line-height: 1;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%; /* Circular */
+    background-color: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
+    border: 1px solid var(--button-secondary-border);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-adjust:hover {
+    background-color: var(--button-secondary-hover-bg);
+    border-color: var(--button-secondary-hover-border);
+}
+.btn-adjust:active {
+    background-color: var(--button-secondary-active-bg);
+    transform: scale(0.95);
+}
+.btn-decrement { order: 1; }
+.btn-increment { order: 3; }
+
+/* Mute Button Styles */
+.mute-toggle-btn {
+    width: auto; /* Override default width */
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border-radius: var(--border-radius); /* Consistent rounding */
+    flex-shrink: 0;
+    line-height: 1.4;
+    /* Inherits .btn-secondary styles initially */
+}
+.mute-toggle-btn.muted {
+    background-color: var(--danger-color);
+    border-color: var(--danger-border-color);
+    color: var(--danger-text-color);
+}
+.mute-toggle-btn.muted:hover {
+    background-color: var(--danger-hover-color);
+    border-color: var(--danger-hover-border-color);
+}
+
 
 /* --- EQ Presets --- */
 .preset-group h3 {
-    text-align: center; /* Center the preset heading */
-    border-bottom: none; /* Optional: Remove border if preferred */
+    text-align: center;
+    border-bottom: none;
     margin-bottom: 10px;
 }
-
 .preset-buttons {
     display: flex;
-    flex-wrap: wrap; /* Allow buttons to wrap to next line */
-    gap: 8px;        /* Spacing between buttons */
-    justify-content: center; /* Center buttons horizontally */
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
 }
-
-.mute-toggle-btn.muted {
-    background-color: #dc3545; /* Red indicating muted */
-    border-color: #dc3545;
-    color: #fff;
-}
-
-.mute-toggle-btn.muted:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-}
-
-.mute-toggle-btn {
-    width: auto; /* Override the default width: 80% */
-    padding: 8px 16px; /* Adjust padding */
-    width: auto; /* Allow it to size based on content */
-    padding: 6px 12px; /* Slightly smaller padding for inline look */
-    font-size: 0.9rem; /* Match preset button size perhaps */
-    flex-shrink: 0; /* Prevent button from shrinking if space is tight */
-    line-height: 1.4; /* Adjust line-height if text vertical alignment seems off */
-    /* Ensure border-radius matches other buttons if desired */
-    border-radius: var(--border-radius);
-
-}
-
 .btn-preset {
-    flex-grow: 1; /* Allow buttons to grow */
-    min-width: 80px; /* Minimum width for smaller buttons */
-    padding: 6px 12px; /* Slightly smaller padding */
+    flex-grow: 1;
+    min-width: 80px;
+    padding: 6px 12px;
     font-size: 0.9rem;
-    border-radius: var(--border-radius); /* Consistent rounding */
-    background-color: var(--light-gray);
-    color: var(--secondary-color);
-    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
+    border: 1px solid var(--button-secondary-border);
     font-weight: 500;
+    /* Inherit .btn transitions */
 }
-
 .btn-preset:hover {
-    background-color: #e2e6ea;
-    border-color: #adb5bd;
-    color: var(--dark-gray);
+    background-color: var(--button-secondary-hover-bg);
+    border-color: var(--button-secondary-hover-border);
+    color: var(--button-secondary-text);
 }
-
 .btn-preset:active {
-    background-color: #d6dade;
-    transform: scale(0.98); /* Keep active effect */
+    background-color: var(--button-secondary-active-bg);
+    transform: scale(0.98);
 }
 
 /* --- Visual Feedback Style --- */
 .control-success-glow {
-    /* Style for the temporary success feedback */
-    box-shadow: 0 0 8px 2px var(--success-glow) !important; /* Use important if needed to override */
+    /* Applied to buttons/labels */
+    box-shadow: 0 0 8px 2px var(--success-glow) !important;
     border-color: var(--success-color) !important;
-    /* Make sure border glow doesn't conflict with muted red */
 }
 .mute-toggle-btn.control-success-glow.muted {
-    box-shadow: 0 0 8px 2px var(--success-glow) !important;
+     /* Keep red background, but show green glow on border/shadow */
+     box-shadow: 0 0 8px 2px var(--success-glow) !important;
+     border-color: var(--success-color) !important; /* Override red border temporarily */
+}
+.channel-options label.control-success-glow {
+     border-color: var(--success-color) !important;
 }
 
-.channel-options label.control-success-glow {
-    border-color: var(--success-color) !important;
+/* Apply glow to slider thumb */
+input[type="range"].control-success-glow::-webkit-slider-thumb {
+    background-color: var(--success-color);
+    box-shadow: 0 0 8px var(--success-glow);
+    border-color: var(--success-color) !important; /* Ensure border matches */
+}
+input[type="range"].control-success-glow::-moz-range-thumb {
+    background-color: var(--success-color);
+    box-shadow: 0 0 8px var(--success-glow);
+    border-color: var(--success-color) !important; /* Ensure border matches */
+}
+
+/* Dim controls when disabled */
+.btn:disabled,
+button:disabled,
+input[type="range"]:disabled,
+input[type="radio"]:disabled + label {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    pointer-events: none; /* Prevent hover/active states */
+}
+input[type="radio"]:disabled + label:hover {
+    background-color: var(--container-bg); /* Prevent hover change when disabled */
+}
+input[type="range"]:disabled::-webkit-slider-thumb {
+    cursor: not-allowed;
+}
+input[type="range"]:disabled::-moz-range-thumb {
+    cursor: not-allowed;
 }

@@ -4,19 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bluetooth Audio Controller</title>
-    <link rel="stylesheet" href="style.css"> <!-- Link the new CSS file -->
+    <link rel="stylesheet" href="style.css"> <!-- Link the CSS file -->
 </head>
-<body>
+<body> <!-- id="bodyElement" is used by JS -->
     <div class="container">
-        <h2>Audio Controller</h2>
+        <!-- Header with Title and Theme Toggle -->
+        <div class="header-controls">
+             <h2>Audio Controller</h2>
+             <button id="darkModeToggle" class="btn theme-toggle-btn" aria-label="Toggle dark mode">
+                 <!-- Emoji (🌙/☀️) will be inserted here by JavaScript -->
+             </button>
+        </div>
 
+        <!-- Connection Button and Status -->
         <button id="connect" class="btn btn-primary">Connect to Bluetooth</button>
         <p id="status" class="status-text">Status: Not connected</p>
 
+        <!-- Channel Selection -->
         <div class="control-group">
             <h3>Channel</h3>
             <div class="channel-options">
-                <!-- Structure: Input first, then Label for easier CSS sibling selection -->
                 <input type="radio" name="channelInput" id="channel1" value="1">
                 <label for="channel1">1</label>
 
@@ -31,31 +38,54 @@
             </div>
         </div>
 
+        <!-- Volume Control -->
         <div class="control-group">
             <h3>Volume</h3>
             <div class="slider-container">
+                <!-- Mute Button -->
                 <button id="muteButton" class="btn btn-secondary mute-toggle-btn">Mute</button>
+                <!-- Volume Slider -->
                 <input type="range" id="volumeInput" min="0" max="100" step="1">
-                <span id="volumeValue" class="slider-value">50</span>
+                <!-- Value Display and +/- Buttons -->
+                <div class="slider-value-controls">
+                    <button class="btn btn-adjust btn-decrement" data-control="volume" aria-label="Decrease Volume">-</button>
+                    <span id="volumeValue" class="slider-value">50</span>
+                    <button class="btn btn-adjust btn-increment" data-control="volume" aria-label="Increase Volume">+</button>
+                </div>
             </div>
         </div>
 
+        <!-- Treble Control -->
         <div class="control-group">
             <h3>Treble</h3>
             <div class="slider-container">
+                <!-- Treble Slider -->
                 <input type="range" id="trebleInput" min="-10" max="10" step="1">
-                <span id="trebleValue" class="slider-value">0</span>
+                <!-- Value Display and +/- Buttons -->
+                <div class="slider-value-controls">
+                    <button class="btn btn-adjust btn-decrement" data-control="treble" aria-label="Decrease Treble">-</button>
+                    <span id="trebleValue" class="slider-value">0</span>
+                    <button class="btn btn-adjust btn-increment" data-control="treble" aria-label="Increase Treble">+</button>
+                </div>
             </div>
         </div>
 
+        <!-- Bass Control -->
         <div class="control-group">
             <h3>Bass</h3>
             <div class="slider-container">
+                <!-- Bass Slider -->
                 <input type="range" id="bassInput" min="-10" max="10" step="1">
-                <span id="bassValue" class="slider-value">0</span>
+                <!-- Value Display and +/- Buttons -->
+                <div class="slider-value-controls">
+                    <button class="btn btn-adjust btn-decrement" data-control="bass" aria-label="Decrease Bass">-</button>
+                    <span id="bassValue" class="slider-value">0</span>
+                    <button class="btn btn-adjust btn-increment" data-control="bass" aria-label="Increase Bass">+</button>
+                </div>
             </div>
         </div>
 
+        <!-- EQ Presets -->
         <div class="control-group preset-group">
             <h3>EQ Presets</h3>
             <div class="preset-buttons">
@@ -67,9 +97,9 @@
                 <button class="btn btn-preset" data-preset="treble_boost">Treble Boost</button>
             </div>
         </div>
-        
-    </div>
 
-    <script src="script.js"></script>
+    </div> <!-- End .container -->
+
+    <script src="script.js"></script> <!-- Link the JavaScript file -->
 </body>
 </html>

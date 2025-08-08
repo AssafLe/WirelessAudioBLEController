@@ -446,3 +446,59 @@ input[type="range"]:disabled::-webkit-slider-thumb {
 input[type="range"]:disabled::-moz-range-thumb {
     cursor: not-allowed;
 }
+
+/* VU Meter Styles */
+.vu-meter-group {
+    margin-bottom: 30px;
+}
+
+.vu-meter-group h3 {
+    text-align: left; /* Align with other control group titles */
+}
+
+.vu-meter-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px; /* Space between L and R meters */
+    transition: opacity 0.3s ease; /* For dimming when inactive */
+}
+
+.vu-channel-label {
+    font-weight: 600;
+    color: var(--heading-color);
+    width: 15px; /* Fixed width for L/R labels */
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.vu-bar-track {
+    flex-grow: 1;
+    height: 12px;
+    background-color: var(--slider-track-color); /* Use a neutral track color */
+    border-radius: 6px;
+    overflow: hidden; /* Ensure the bar stays within the track's rounded corners */
+    border: 1px solid var(--border-color); /* Slight border for definition */
+    transition: var(--theme-transition);
+}
+
+.vu-bar {
+    height: 100%;
+    width: 0%; /* Initial width */
+    background-color: var(--primary-color); /* Simpler, single color bar */
+    border-radius: 6px; /* Match track radius */
+    transition: width 0.05s ease-out; /* Smooth transition for meter movement */
+    /* If you want a gradient for the bar: */
+    /* background-image: linear-gradient(to right, #28a745, #ffc107, #dc3545); */
+    /* background-size: 200% 100%; */
+    /* background-position: 100%; */
+}
+
+/* Dark mode adjustments for VU Meter */
+body[data-theme="dark"] .vu-bar-track {
+    background-color: #343a40; /* Darker track */
+    border-color: #5a6268;
+}
+body[data-theme="dark"] .vu-bar {
+    background-color: var(--primary-color); /* Still primary for now, can be adjusted */
+}

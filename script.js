@@ -17,7 +17,8 @@ const CHARACTERISTIC_UUIDS = {
     volume: '0000ffe1-0000-1000-8000-00805f9b34fb',
     channel: '0000ffe2-0000-1000-8000-00805f9b34fb',
     treble: '0000ffe3-0000-1000-8000-00805f9b34fb',
-    bass: '0000ffe4-0000-1000-8000-00805f9b34fb'
+    bass: '0000ffe4-0000-1000-8000-00805f9b34fb',
+    vuMeter: '0000ffe5-0000-1000-8000-00805f9b34fb'
 };
 
 // --- EQ Presets Definition ---
@@ -47,6 +48,11 @@ const darkModeToggle = document.getElementById('darkModeToggle');
 const bodyElement = document.body;
 let adjustButtons = []; // Will be populated in DOMContentLoaded
 
+// VU Meter DOM elements
+let vuBarL;
+let vuBarR;
+let vuMeterElements; // NodeList of containers for visual management
+
 // --- All *Audio* Controls Array ---
 // REMOVED connectButton from this list
 // Populated fully in DOMContentLoaded
@@ -60,11 +66,18 @@ const audioControls = [
     // adjustButtons will be added later
 ];
 
+const textDecoder = new TextDecoder('utf-8'); // For decoding incoming string data
+
 // --- Initialize ---
 document.addEventListener("DOMContentLoaded", () => {
     // Get Adjustment Buttons and add to audioControls
     adjustButtons = document.querySelectorAll('.btn-adjust');
     audioControls.push(...Array.from(channelInputs), ...Array.from(presetButtons), ...Array.from(adjustButtons)); // Add all dynamically found controls
+
+    //Get VU Meter DOM elements
+    vuBarL = document.getElementById('vuBarL');
+    vuBarR = document.getElementById('vuBarR');
+    vuMeterElements = document.querySelectorAll('.vu-meter-container'); // To manage opacity
 
     // Initialize channelStates for all channels
     channelInputs.forEach(input => {
@@ -89,6 +102,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start with audio controls disabled, connect button enabled
     disableAudioControls();
     connectButton.disabled = false; // Ensure connect is enabled initially
+
+    // Initial state for VU meter: off
+    updateVuMeter(0, 0);
+    setVuMeterActive(false);
+
 
     // Add Event Listeners
     connectButton.addEventListener('click', handleConnectClick);
@@ -171,6 +189,12 @@ async function connectDevice() {
              try {
                  characteristics[key] = await service.getCharacteristic(CHARACTERISTIC_UUIDS[key]);
                  console.log(`Found Characteristic: ${key}`);
+                 // Special handling for VU Meter: Start notifications
+                 if (key === 'vuMeter') {
+                     await characteristics[key].startNotifications();
+                     characteristics[key].addEventListener('characteristicvaluechanged', onVuMeterCharacteristicChanged);
+                     console.log('VU Meter notifications started.');
+                 }
              } catch (charError) {
                   console.error(`Characteristic ${key} (${CHARACTERISTIC_UUIDS[key]}) not found!`, charError);
                   throw new Error(`Missing characteristic: ${key}`);
@@ -192,6 +216,11 @@ async function connectDevice() {
         await sendData('treble');  // Send current treble for this channel
         await sendData('bass');    // Send current bass for this channel
         console.log(`Sent initial state for current channel ${currentChannel}.`);
+
+        // Set VU meter to active/visible state (e.g., initial 0%)
+        updateVuMeter(0, 0); // Initialize with 0
+        setVuMeterActive(true);
+
 
     } catch (error) {
         // --- Failure ---
@@ -224,6 +253,10 @@ async function connectDevice() {
         }
         bluetoothDevice = null;
         characteristics = {};
+
+        // Reset VU meter on failure
+        updateVuMeter(0, 0);
+        setVuMeterActive(false);
     }
 }
 
@@ -240,7 +273,7 @@ function disconnectDevice() {
 }
 
 
-function onDisconnected() {
+async function onDisconnected() {
     console.log('Bluetooth device disconnected.');
     statusDisplay.textContent = 'Status: Not connected';
     connectButton.textContent = 'Connect';
@@ -254,6 +287,23 @@ function onDisconnected() {
     // storedVolumeBeforeMute = 50;
 
     // Cleanup BLE state
+    // Stop VU Meter notifications and clear display
+    if (characteristics.vuMeter) {
+        try {
+            characteristics.vuMeter.removeEventListener('characteristicvaluechanged', onVuMeterCharacteristicChanged);
+            // Only attempt to stop notifications if the device was actually connected
+            // This avoids an error if the disconnect was due to a lost connection, not an intentional disconnect
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                await characteristics.vuMeter.stopNotifications();
+            }
+            console.log('VU Meter notifications stopped.');
+        } catch (error) {
+            console.warn('Error stopping VU Meter notifications (might already be stopped):', error);
+        }
+    }
+    updateVuMeter(0, 0); // Reset VU meter to zero
+    setVuMeterActive(false); // Visually indicate inactive
+
     if (bluetoothDevice) {
          bluetoothDevice.removeEventListener('gattserverdisconnected', onDisconnected);
     }
@@ -414,7 +464,7 @@ function handleAdjustButtonClick(event) {
             storedVolumeBeforeMute = newValue; // Sync global
         } else if (isMuted && newValue <= 0) { // Already muted at zero
              if (currentValue === 0) return; // Do nothing if already 0
-             newValue = 0; // Ensure it stays 0
+             newValue = 0;
         }
     }
 
@@ -613,6 +663,62 @@ async function sendData(type, valueToSend = null) {
     }
 }
 
+// VU Meter specific functions
+function onVuMeterCharacteristicChanged(event) {
+    const value = event.target.value; // DataView
+    let lValue = 0;
+    let rValue = 0;
+
+    try {
+        // Assuming data comes as a comma-separated string, e.g., "50,75"
+        const dataString = textDecoder.decode(value);
+        const values = dataString.split(',').map(Number);
+
+        if (values.length === 2 && !isNaN(values[0]) && !isNaN(values[1])) {
+            lValue = Math.max(0, Math.min(100, values[0])); // Clamp between 0-100
+            rValue = Math.max(0, Math.min(100, values[1])); // Clamp between 0-100
+        } else {
+            console.warn('Received unexpected VU meter data format:', dataString);
+            // Fallback: Try to parse as single value if comma not found
+            const singleValue = Number(dataString);
+            if (!isNaN(singleValue)) {
+                lValue = rValue = Math.max(0, Math.min(100, singleValue));
+            }
+        }
+    } catch (e) {
+        console.error('Error decoding VU meter value:', e);
+        // Fallback for raw byte data if string decoding fails
+        if (value.byteLength >= 2) {
+            lValue = Math.max(0, Math.min(100, value.getUint8(0)));
+            rValue = Math.max(0, Math.min(100, value.getUint8(1)));
+        } else if (value.byteLength === 1) {
+             lValue = rValue = Math.max(0, Math.min(100, value.getUint8(0)));
+        }
+    }
+
+    updateVuMeter(lValue, rValue);
+}
+
+// Helper to update VU meter UI
+function updateVuMeter(l, r) {
+    if (vuBarL && vuBarR) {
+        vuBarL.style.width = `${l}%`;
+        vuBarR.style.width = `${r}%`;
+    }
+}
+
+// Helper to visually enable/disable VU meter (dimming)
+function setVuMeterActive(active) {
+    vuMeterElements.forEach(element => {
+        if (active) {
+            element.style.opacity = '1';
+        } else {
+            element.style.opacity = '0.6'; // Dim when inactive
+        }
+    });
+}
+
+
 // --- Visual Feedback ---
 function showFeedback(controlIdentifier) {
     let element;
@@ -657,9 +763,6 @@ function applyFeedback(element, feedbackClass, timeoutKey) {
 }
 
 // --- Enable/Disable Controls ---
-// The original disableAllControls and enableAllControls are not used directly,
-// but their logic is similar to disable/enableAudioControls.
-// Keeping them for reference or if they are called elsewhere not provided.
 /*
 function disableAllControls(includeConnectButton = true) {
     // This function seems to use an 'allControls' array which is not defined in the provided scope.
@@ -702,6 +805,9 @@ function disableAudioControls() {
        if (control) control.disabled = true; // Check if control exists
    });
    setRadioLabelsDisabled(true); // Update visuals for radio labels
+   // Reset and dim VU meter
+   updateVuMeter(0, 0);
+   setVuMeterActive(false);
    console.log("Audio Controls Disabled");
 }
 
@@ -711,5 +817,9 @@ function enableAudioControls() {
        if (control) control.disabled = false; // Check if control exists
    });
     setRadioLabelsDisabled(false); // Update visuals for radio labels
+    // VU meter state is handled by the connection logic and notifications
+    // It should be active if connected, so no need to explicitly enable here.
+    // It's set to active in connectDevice if successful.
+    // If it was already active from a previous connection, it stays active.
    console.log("Audio Controls Enabled");
 }
